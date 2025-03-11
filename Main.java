@@ -388,28 +388,21 @@ public class Main {
    * ファイルダイアログを開く
    */
   private void openFileDialog() {
-    JFileChooser fileChooser = new JFileChooser();
-    fileChooser.setDialogTitle("ファイルを開く");
-
-    // ファイルフィルターの設定（例：テキストファイルのみ）
-    FileNameExtensionFilter filter = new FileNameExtensionFilter(
-        "テキストファイル (*.txt)", "txt");
-    fileChooser.addChoosableFileFilter(filter);
-
-    // すべてのファイルも選択可能に
-    fileChooser.setAcceptAllFileFilterUsed(true);
-
-    int result = fileChooser.showOpenDialog(frame);
-
-    if (result == JFileChooser.APPROVE_OPTION) {
-      // 選択されたファイル
-      java.io.File selectedFile = fileChooser.getSelectedFile();
-
+    FileDialog fileDialog = new FileDialog(frame, "ファイルを開く", FileDialog.LOAD);
+    
+    fileDialog.setFilenameFilter((dir, name) -> name.endsWith(".txt") || name.endsWith(".csv"));
+    
+    fileDialog.setVisible(true);
+    
+    // 選択されたファイルを取得
+    if (fileDialog.getFile() != null) {
+      String selectedFilePath = fileDialog.getDirectory() + fileDialog.getFile();
+      
       // ファイルの処理（例：状態バーに表示）
-      statusLabel.setText("選択されたファイル: " + selectedFile.getAbsolutePath());
-
+      statusLabel.setText("選択されたファイル: " + selectedFilePath);
+      
       // ここにファイルを開く処理を追加
-      // 例: readFile(selectedFile);
+      // 例: readFile(new File(selectedFilePath));
     }
   }
 

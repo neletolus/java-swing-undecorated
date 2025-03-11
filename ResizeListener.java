@@ -19,14 +19,7 @@ public class ResizeListener implements MouseListener, MouseMotionListener {
     public static void drawResizableBorder(JFrame frame) {
         JRootPane rootPane = frame.getRootPane();
         
-        // Mac風の洗練されたボーダーを設定
-        // 外側は半透明のグレーでやや薄め、内側は営業カラーを使用
-        rootPane.setBorder(BorderFactory.createCompoundBorder(
-            // 外側のボーダー（薄いグレー）
-            BorderFactory.createLineBorder(new Color(180, 180, 180, 200), RESIZE_BORDER_WIDTH),
-            // 内側の微妙なハイライト
-            BorderFactory.createEmptyBorder(1, 1, 1, 1)
-        ));
+        rootPane.setBorder(BorderFactory.createLineBorder(new Color(70, 130, 180), RESIZE_BORDER_WIDTH));
     }
     
     // どの領域にマウスがあるかを判定し、カーソルを設定
