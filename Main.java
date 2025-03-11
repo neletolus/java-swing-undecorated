@@ -1,11 +1,16 @@
 import javax.swing.*;
 import javax.swing.border.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
+
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import javafx.stage.FileChooser;
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
+import javafx.stage.Stage;
+
 
 public class Main {
   private JFrame frame;
@@ -388,21 +393,56 @@ public class Main {
    * ファイルダイアログを開く
    */
   private void openFileDialog() {
-    FileDialog fileDialog = new FileDialog(frame, "ファイルを開く", FileDialog.LOAD);
+    // JavaFX環境を初期化
+    // JFXPanelを作成するだけでJavaFXツールキットが初期化される
+    final JFXPanel fxPanel = new JFXPanel();
     
-    fileDialog.setFilenameFilter((dir, name) -> name.endsWith(".txt") || name.endsWith(".csv"));
+    // JavaFXのスレッドでファイルダイアログを実行
+    final java.io.File[] selectedFileRef = new java.io.File[1];
     
-    fileDialog.setVisible(true);
+    // 同期的に実行するためのセマフォ
+    final Object lock = new Object();
     
-    // 選択されたファイルを取得
-    if (fileDialog.getFile() != null) {
-      String selectedFilePath = fileDialog.getDirectory() + fileDialog.getFile();
+    Platform.runLater(() -> {
+      try {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("ファイルを開く");
+        
+        // フィルターを設定
+        FileChooser.ExtensionFilter txtFilter = new FileChooser.ExtensionFilter("テキストファイル", "*.txt");
+        FileChooser.ExtensionFilter csvFilter = new FileChooser.ExtensionFilter("CSVファイル", "*.csv");
+        fileChooser.getExtensionFilters().addAll(txtFilter, csvFilter);
+        
+        // 新しいStageを作成してダイアログを表示
+        Stage stage = new Stage();
+        selectedFileRef[0] = fileChooser.showOpenDialog(stage);
+      } finally {
+        // 処理が完了したことを通知
+        synchronized (lock) {
+          lock.notify();
+        }
+      }
+    });
+    
+    // ファイル選択が完了するまで待機
+    synchronized (lock) {
+      try {
+        lock.wait(10000); // タイムアウトは10秒
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
+    
+    // 選択されたファイルを処理
+    java.io.File selectedFile = selectedFileRef[0];
+    if (selectedFile != null) {
+      String selectedFilePath = selectedFile.getAbsolutePath();
       
       // ファイルの処理（例：状態バーに表示）
       statusLabel.setText("選択されたファイル: " + selectedFilePath);
       
       // ここにファイルを開く処理を追加
-      // 例: readFile(new File(selectedFilePath));
+      // 例: readFile(selectedFile);
     }
   }
 
